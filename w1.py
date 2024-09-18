@@ -1,6 +1,6 @@
 ##### Chapter W1 #####
-print("Hello user, welcome to the Motion Detector! Let's start.")
-Name = str(input("What's ur name? "))
+print("Hello user, welcome to the Motion Detector! Let's start.")### user input:
+Name = str(input("What's ur name? "))###name and birthday
 LName = str(input("What;s ur lastname? "))
 BDate = input("When you've been born write? \
 The date in (dd/mm/yyyy) format. ")
@@ -14,7 +14,7 @@ Let’s start. Your username is: ")
 print(Name[:2] + LName[:3] + BYear + BMounth + BDay)
 
 
-Movement = input("There was a movement in the room? (y/n) ")
+Movement = input("There was a movement in the room? (y/n) ")### movement detection
 if (Movement == "YES") or (Movement == "yes") or (Movement == "y"):
     print("Movement detected")
 elif (Movement == "NO") or (Movement == "no") or (Movement == "n"):
@@ -24,7 +24,7 @@ else:
 
 
 
-print("Celsius to Fahrenheit calculator")
+print("Celsius to Fahrenheit calculator")###Celsius to Fahrenheit converter
 CDegrees = float(input("Enter the Celsius Degrees: "))
 FDegrees = round((CDegrees *1.8 + 32), 2)
 
