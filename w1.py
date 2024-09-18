@@ -1,3 +1,5 @@
+##### Chapter W1 #####
+print("Hello user, welcome to the Motion Detector! Let's start.")
 Name = str(input("What's ur name? "))
 LName = str(input("What;s ur lastname? "))
 BDate = input("When you've been born write? \
@@ -28,3 +30,4 @@ FDegrees = round((CDegrees *1.8 + 32), 2)
 
 
 print(f"The given temperature {CDegrees}C° is {FDegrees}F")
+##### Chapter W2 #####
