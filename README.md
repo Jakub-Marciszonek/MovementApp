@@ -6,4 +6,4 @@ detect movement by user unput
 convert celsius or farenheit degrees
 evaluate the temperature of cpu(temperature is random nr)
 not perfert quit function XD
-![Alt text](https://drive.google.com/file/d/157DhgMEiZTv_C3yyk9puzvVFNbju4tYZ/view?usp=drive_link)
+![Alt text](https://app.diagrams.net/#G157DhgMEiZTv_C3yyk9puzvVFNbju4tYZ#%7B%22pageId%22%3A%22C5RBs43oDa-KdzZeNtuy%22%7D)
