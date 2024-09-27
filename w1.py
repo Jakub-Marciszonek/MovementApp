@@ -3,6 +3,7 @@
 import sys
 import datetime
 import random
+import string
 
 ##### Def #####
 
@@ -41,16 +42,62 @@ or ((len(BDay) != 2) or (int(BDay) < 1) or (int(BDay) > 31)):
 ###login
 if (Name.lower() == "jakub") and \
 (LName.lower() == "marciszonek") and (BDate == "30/01/2004"): 
-    print(f"------Welcome {Name}, you have admin rights------")
+    print(f"------Welcome {Name}, you have {UserRights[0]} rights------")
+    CurrentRights = UserRights[0]
 elif (Name.lower() == "mira") and (LName.lower() == "vorne") \
 and (BDate == "11/11/1111"):
-    print(f"======Welcome {Name}, you have super-user rights======")
+    print(f"======Welcome {Name}, you have {UserRights[1]} rights======")
+    CurrentRights = {UserRights[1]}
 elif Age >= 18:
     print(f"Welcome {Name}, you have viewer rights.")
+    CurrentRights = UserRights[2]
 else:
     print(f"Greetings {Name}, you are too young to operate this program. Continue")
 
 print(Name[:2] + LName[:3] + BYear + BMonth + BDay)###username
+
+### Password generator
+PasswordSub = str()
+
+while PasswordSub.lower() != "yes" or "y":
+    length = int(input("Enter length of the password: "))
+    print("Choose characters that are going to be used in password:\n\
+1. Digits\n2. Lowercase letters\n3. Uppercase letters\n\
+4. Special characters\n5. Generate")
+    CharacterList = ""
+
+    while True:
+        CharacterChoice = int(input("Pick a number "))
+        if (CharacterChoice == 1):
+            CharacterList += string.digits
+        elif (CharacterChoice == 2):
+            CharacterList += string.ascii_lowercase
+        elif (CharacterChoice == 3):
+            CharacterList += string.ascii_uppercase
+        elif (CharacterChoice == 4):
+            CharacterList += string.punctuation
+        elif (CharacterChoice == 5):
+            break
+        else:
+            print("Invalid data")
+        
+    Password = []
+    for i in range(length):
+
+        PasswordCharacters = random.choice(CharacterList)
+
+        Password.append(PasswordCharacters)
+
+    print(f"The random password is \"{"".join(Password)}\"")
+    PasswordSub = str(input("Do you want to submit the password or generate another one?\n\
+    (Submit/Generate): "))
+    if PasswordSub.lower() == "submit":
+        break
+    elif PasswordSub.lower() == "generate":
+        continue
+    else:
+        print("Invalid data\nRestarting the generator")
+        continue
 
 ##### Movement detection #####
 ### test version with random input
