@@ -28,6 +28,26 @@ Length = 0
 
 NewUser = {}
 
+##### Data update #####
+
+def Update():
+    Feeds = []
+    url = "https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=20"
+    response = requests.get(url)
+    if response != 200:
+        return
+    data = response.json()###download
+    for i in data["feeds"]:
+        Movement_value = i["field1"]
+        Temp_value = i["field2"]
+        Time_value = i["created_at"]
+        Feed = {"Movement":  Movement_value, "Temp": Temp_value, "Time": Time_value}
+    Feeds.append(Feed)
+    
+    Feeds = {"feeds": Feeds}
+    with open("data/TempNMove.json", "w") as file:
+        json.dump(Feeds, file, indent=4)
+
 ##### Quit function #####
 
 def QuitCheck(inp):
@@ -253,63 +273,41 @@ Password have to be min 5 characters long(Generate/Create)")
 ##### Movement detection #####
 ### test version with random input
 def MoveDet():
-    YesNo = ("yes", "no")
-    Movement = random.choice(YesNo)
-    #Movement = input("There was a movement in the room? (y/n) \n")
-    #QuitCheck(Movement)
-    if (Movement.lower() == "yes" or Movement.lower() == "y"):
+    print("Movement detector")
+    with open("data/TempNMove.json", "r") as file:
+        data = json.load(file)
+    Movement = data["feeds"][len(data["feeds"]) - 1]["Movement"]
+    if (Movement == "1"):
         print("Movement detected")
-    elif (Movement.lower() == "no" or Movement.lower() == "n"):
+    elif (Movement == "0"):
         print("Movement not detected")
     else:
         print("Invalid data")
-
 ##### Temperature converter and evaluator #####
 def TempConEva():
     print("Celsius to Fahrenheit calculator")
-    
-    TemD = (input("Choose the units that you want to convert\
+    with open("data/TempNMove.json", "r") as file:
+        data = json.load(file)
+    Temp = data["feeds"][len(data["feeds"]) - 1]["Temp"]
+    TemD = (input("Choose the units that you want to display\
     \n1. Celsius degrees\n2. Fahrenheit degrees\n"))
-    QuitCheck(TemD)
     if TemD == "1":###Celsius to Fahrenheit converter
-        CDegrees = float(input("Enter the Celsius degrees: "))
-        QuitCheck(CDegrees)
-        FDegrees = round((CDegrees * 1.8 + 32), 2)
-        print(f"The given temperature {CDegrees}C° is {FDegrees}F°")
+
+        print(f"The temperature is {Temp}C°")
     elif TemD == "2":
-        FDegrees = float(input("Enter the Fahrenheit degrees: "))
-        QuitCheck(FDegrees)
-        CDegrees = round(((FDegrees - 32) / 1.8), 2)
-        print(f"The given temperature {FDegrees}F° is {CDegrees}C°")
+        FDegrees = (Temp*9/5) + 32
+        print(f"The given temperature {Temp}C° is equal to {FDegrees}F°")
     else:
         print("Invalid data")
-    
-    # CDegrees = random.randint(20, 100) ###temp tester
 
-    if CDegrees <= 40:
+    if Temp <= 40:
         print("CPU is dead cold")
-    elif CDegrees > 80:
+    elif Temp > 80:
         print("[*]RIP CPU [*]")
-    elif CDegrees > 65:
+    elif Temp > 65:
         print("It's getting hot here ( ͡° ͜ʖ ͡°)")
     else:
         print("ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧")
-
-
-
-
-##### working main
-def main():
-    print("Hello user, welcome to the Motion Detector! Let's start.\n\
-type quit whenever you would like to end the session.")
-    while True:
-        ID = LogReg()
-        if ID < 0:###The ID is position of user in list so it cannot
-            LogRights()###have negative value
-            PasswordCreation()
-        # MoveDet()
-        # TempConEva()
-        break
 
 def NoGame():
     Wins = 0
@@ -343,7 +341,22 @@ def NoGame():
         print(f"You won {Wins} times\nYou lost {Loses} times\nIn {Turns} turns.")
         print("If you would like to exit just type exit if not let me continue")
 
-
+##### working main
+# def main():
+#     print("Hello user, welcome to the Motion Detector! Let's start.\n\
+# type quit whenever you would like to end the session.")
+#     ID = LogReg()
+#     if ID < 0:###The ID is position of user in list so it cannot
+#         LogRights()###have negative value
+#         PasswordCreation()
+#     MoveDet()
+#     TempConEva()
+    
+# main()
+    
+    
+    
+    
 #### working main
 # main()
 # print(NewUser)
