@@ -24,29 +24,35 @@ CharacterList = []
 CharacterChoice = 0
 Length = 0
 
-###List in Use###
+###Data in Use###
 
 NewUser = {}
+data = ""
 
 ##### Data update #####
 
-def Update():
-    Feeds = []
-    url = "https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=20"
-    response = requests.get(url)
-    if response != 200:
+def AddUser(Path, NewUser):
+    with open(Path, "r") as file:
+        Data = json.load(file)
+    print(f"Download\n{Data}")
+    Data["Users"].append(NewUser)
+    print(Data)
+    with open(Path, "w") as file:
+        json.dump(Data, file, indent=4)
+
+
+
+def UpdateAPI(API):
+    global data
+### https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=20
+    response = requests.get(API)
+    if response.status_code != 200:
+        print("API data couldn't be updated")
         return
     data = response.json()###download
-    for i in data["feeds"]:
-        Movement_value = i["field1"]
-        Temp_value = i["field2"]
-        Time_value = i["created_at"]
-        Feed = {"Movement":  Movement_value, "Temp": Temp_value, "Time": Time_value}
-    Feeds.append(Feed)
-    
-    Feeds = {"feeds": Feeds}
+
     with open("data/TempNMove.json", "w") as file:
-        json.dump(Feeds, file, indent=4)
+        json.dump(data, file, indent=4)
 
 ##### Quit function #####
 
@@ -55,29 +61,30 @@ def QuitCheck(inp):
         sys.exit()
 
 ##### Checkes if somebodies username is already saved #####
-def LoginIn(Username, Password):                            
+def LogCheck(Username, Password):                            
     with open("data/Users.json", "r") as file:
         data = json.load(file)
         for i in range(len(data["Users"])):
             if Username == data["Users"][i]["Login"]:
-                LogNr = i
+                ID = i
             else:
-                LogNr = -1
+                ID = -1
             if Password == data["Users"][i]["Password"]:
                 PassNr = i
             else:
-                PassNr = LogNr - 1
-            if LogNr == PassNr:
+                PassNr = ID - 1
+            if ID == PassNr:
                 print("Succsesfully loged in")
-                return LogNr
+                return ID
         print("Incorrect Login or Password")
         return -1
 
 def UsernameCheck(Username):
     with open("data/Users.json", "r") as file:
         data = json.load(file)
-    for i in range(len(data["Users"])):
-        if Username == data["Users"][i]["Login"]:
+    for i in data["Users"]:
+        print(i)
+        if Username == i["Login"]:
             print("Username is occupied")
             return True
         else:
@@ -89,12 +96,20 @@ def UserData():
 
     Name = str(input("What's ur name? ")).title()###name and birthday
     QuitCheck(Name)
+    if str(Name).lower() == "back":
+        return
     LName = str(input("What's ur lastname? ")).title()
     QuitCheck(LName)
+    if str(LName).lower() == "back":
+        return
+
     while True:
         BDate = input("When you've been born write? \
 The date in (dd/mm/yyyy) format. \n")
         QuitCheck(BDate)
+        if str(BDate).lower() == "back":
+            return
+
         
         BDay, BMonth, BYear = map(str, BDate.split("/"))# map is deviding one 
         # variable into 3 new ones respectivly by .split function where separator
@@ -118,16 +133,6 @@ def LogRights():
     if int(BMonth) > PDate.month or (int(BMonth) == PDate.month and int(BDay) < PDate.day):
         Age -= 1 ###counting age based on birth date
 
-    # if (Name.lower() == "jakub") and \
-    # (LName.lower() == "marciszonek") and (BDate == "30/01/2004"): 
-    #     print(f"------Welcome {Name}, you have {UserRights[0]} rights------")
-    #     CurrentRights = UserRights[0]
-    #     return CurrentRights
-    # elif (Name.lower() == "mira") and (LName.lower() == "vorne") \
-    # and (BDate == "11/11/1111"):
-    #     print(f"======Welcome {Name}, you have {UserRights[1]} rights======")
-    #     CurrentRights = {UserRights[1]}
-    #     return CurrentRights
     elif Age >= 18:
         NewUser.update({"Age":Age})
         NewUser.update({"Rights":"Viewer"})
@@ -137,53 +142,61 @@ def LogRights():
         print(f"Greetings {Name}, you are too young to operate this program. Continue")
         return 
     
-#### Creates Username#####
-def LogReg():
-    global BDay, BMonth, BYear, Name, LName, Username
+#####Log in #####
+def Login():
     while True:
-        Choice = input("Do you have account?(y/n)")
-        QuitCheck(Choice)
-        if Choice.lower() == "y"or Choice.lower() == "yes":
-            Username = input("Insert your username: ")
-            QuitCheck(Username)
-            Password = input("Insert your password: ")
-            QuitCheck(Password)
-            ID = LoginIn(Username, Password)
-            if ID != -1:
-                print(f"\nWelcome {Username}\n")
-                return ID
-                
-        elif Choice.lower() == "no" or Choice.lower() == "n":
-            UserData()
-            Choice = input("Would you like to create your username\
+        Username = input("Insert your login: ")
+        QuitCheck(Username)
+        if str(Username).lower() == "back":
+            break
+        Password = input("Insert your password: ")
+        QuitCheck(Password)
+        if str(Password).lower() == "back":
+            break
+        ID = LogCheck(Username, Password)
+        if ID != -1:
+            print(f"\nWelcome {Username}\n")
+            return ID
+        else:
+            print("Invlid data")
+##^^^Login^^^##
+def Registration():
+    global BDay, BMonth, BYear, Name, LName, Username
+#### Creates Username#####
+    while True:
+        UserData()
+        Choice = input("Would you like to create your username\
 or generate it?(Create/Generate)")
+        QuitCheck(Choice)
+        if str(Choice).lower() == "back":
+            return
+        if Choice.lower() == "generate" or Choice.lower() == "g":
+            Username = Name[:2] + LName[:3] + str(BYear) + BMonth + BDay
+            while UsernameCheck(Username) == True:
+                Username = Username + str(random.randint(1,9))
+                if UsernameCheck(Username) != True:
+                    break
+            Choice = input(f"I suggest {Username}(Submit/restart) ")
             QuitCheck(Choice)
-            if Choice.lower() == "generate" or Choice.lower() == "g":
-                Username = Name[:2] + LName[:3] + str(BYear) + BMonth + BDay
-                while UsernameCheck(Username) == True:
-                    Username = Username + str(random.randint(1,9))
-                    if UsernameCheck(Username) != True:
-                        break
-                Choice = input(f"I suggest {Username}(Submit/restart) ")
-                QuitCheck(Choice)
-                if Choice.lower() == "submit" or Choice.lower() == "s":
+            if Choice.lower() == "submit" or Choice.lower() == "s":
+                NewUser.update({"Login":Username})
+                return -1
+            else:
+                print("Restarting...")
+                continue
+        elif Choice.lower() == "create" or Choice.lower() == "c":
+            while True:
+                Username = input("Insert username: ")
+                QuitCheck(Username)
+                if str(Username).lower() == "back":
+                    return
+                if UsernameCheck(Username) != True:
                     NewUser.update({"Login":Username})
                     return -1
                 else:
-                    print("Restarting...")
-                    continue
-            elif Choice.lower() == "create" or Choice.lower() == "c":
-                while True:
-                    Username = input("Insert username: ")
-                    QuitCheck(Username)
-                    if UsernameCheck(Username) != True:
-                        NewUser.update({"Login":Username})
-                        return -1
-                    
-            print(f"Your username is:\n{Username}")
-        else:
-            print("Invalid data")
-   
+                    print("Invalid data")
+        print(f"Your username is:\n{Username}")
+##^^^ Registration part ^^^##
 ##### Password generator ######
 ### Characteer selection menu
 def CharSelMenu():
@@ -244,7 +257,7 @@ Password have to be min 5 characters long(Generate/Create)")
                     PasswordSub = str(input("Do you want to submit, generate or restart the password?\n\
 (Submit/Restart/Generate): "))
                     if PasswordSub.lower() == "submit" or "sub" or "s":
-                        NewUser.append({"Password":"".join(Password)})
+                        NewUser.update({"Password":"".join(Password)})
                         return 
                     elif PasswordSub.lower() == "restart" or "res" or "r":
                         break
@@ -273,41 +286,38 @@ Password have to be min 5 characters long(Generate/Create)")
 ##### Movement detection #####
 ### test version with random input
 def MoveDet():
-    print("Movement detector")
-    with open("data/TempNMove.json", "r") as file:
-        data = json.load(file)
-    Movement = data["feeds"][len(data["feeds"]) - 1]["Movement"]
-    if (Movement == "1"):
-        print("Movement detected")
-    elif (Movement == "0"):
-        print("Movement not detected")
-    else:
-        print("Invalid data")
+    print("~~~Movement Detectort & Celsius to Fahrenheit calculator~~~")
+    # Movement = data["feeds"][len(data["feeds"]) - 1]["Movement"]
+    ###last entry
+    for i in data["feeds"]:
+        if (i["field1"] == "1"):
+            print("Movement detected")
+        elif (i["field1"] == "0"):
+            print("Movement not detected")
+        else:
+            print("Invalid data")
+
 ##### Temperature converter and evaluator #####
-def TempConEva():
-    print("Celsius to Fahrenheit calculator")
-    with open("data/TempNMove.json", "r") as file:
-        data = json.load(file)
-    Temp = data["feeds"][len(data["feeds"]) - 1]["Temp"]
-    TemD = (input("Choose the units that you want to display\
-    \n1. Celsius degrees\n2. Fahrenheit degrees\n"))
-    if TemD == "1":###Celsius to Fahrenheit converter
+def Temp():
+        TemD = (input("Choose the units that you want to display\
+\n1. Celsius degrees\n2. Fahrenheit degrees\n"))
+        for i in data["feeds"]:
+            if TemD == "1":###Celsius to Fahrenheit converter
+                print(f"The temperature is {i["field2"]}C°")
+            elif TemD == "2":
+                FDegrees = (float(i["field2"])*9/5) + 32
+                print(f"The given temperature {i["field2"]}C° is equal to {FDegrees:.2f}F°")
+            else:
+                print("Invalid data")
 
-        print(f"The temperature is {Temp}C°")
-    elif TemD == "2":
-        FDegrees = (Temp*9/5) + 32
-        print(f"The given temperature {Temp}C° is equal to {FDegrees}F°")
-    else:
-        print("Invalid data")
-
-    if Temp <= 40:
-        print("CPU is dead cold")
-    elif Temp > 80:
-        print("[*]RIP CPU [*]")
-    elif Temp > 65:
-        print("It's getting hot here ( ͡° ͜ʖ ͡°)")
-    else:
-        print("ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧")
+            if float(i["field2"]) <= 40:
+                print("CPU is dead cold")
+            elif float(i["field2"]) > 80:
+                print("[*]RIP CPU [*]")
+            elif float(i["field2"]) > 65:
+                print("It's getting hot here ( ͡° ͜ʖ ͡°)")
+            else:
+                print("ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧")
 
 def NoGame():
     Wins = 0
@@ -340,33 +350,41 @@ def NoGame():
             Loses += 1
         print(f"You won {Wins} times\nYou lost {Loses} times\nIn {Turns} turns.")
         print("If you would like to exit just type exit if not let me continue")
+###menu
 
-##### working main
-# def main():
-#     print("Hello user, welcome to the Motion Detector! Let's start.\n\
-# type quit whenever you would like to end the session.")
-#     ID = LogReg()
-#     if ID < 0:###The ID is position of user in list so it cannot
-#         LogRights()###have negative value
-#         PasswordCreation()
-#     MoveDet()
-#     TempConEva()
+def MenuDisplay():
+    print("~~~~~Menu~~~~~")
+    print("1.Login\n2.Register\n3.Movement feed\n4.Temperature feed\n0.Exit")
     
-# main()
-    
-    
-    
-    
-#### working main
-# main()
-# print(NewUser)
-# with open("data/Users.json", "r") as file:
-#     Data = json.load(file)
+def Menu():
+    print("Hello user, welcome to the Motion Detector! Let's start.\
+type quit whenever you would like to end the session.\n")
+    while True:
+        UpdateAPI("https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=5")
+        MenuDisplay()
+        MenuChoice = int(input(""))
+        if MenuChoice == 1:
+            print("When you want to go back into menu write \"back\"")
+            ID = Login()
+        elif MenuChoice == 2:
+            print("When you want to go back into menu write \"back\"")
+            Registration()
+            LogRights()
+            PasswordCreation()
+            AddUser("data/Users.json", NewUser)
+        elif MenuChoice == 3:
+            MoveDet()
+        elif MenuChoice == 4:
+            Temp()
+        MenuExit(MenuChoice)
 
-# Data["Users"].append(NewUser)
+def MenuExit(MenuChoice):
+    QuitCheck(MenuChoice)
+    if MenuChoice == 0:
+        print("Shutting down the program")
+        sys.exit()
 
-# with open("data/Users.json", "w") as file:
-#     json.dump(Data, file)
-# print("You are registered")
-# with open("data/Users.json", "r") as file:
-#     print(json.load(file))
+def main():
+    Menu()
+
+main()

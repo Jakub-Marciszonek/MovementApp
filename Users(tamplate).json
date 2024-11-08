@@ -1,0 +1,12 @@
+{
+    "Users": [
+        {
+            "Name": "name",
+            "Surname": "surname",
+            "Bday": "11/11/1111",
+            "Login": "login",
+            "Age": 11,
+            "Rights": "Admin",
+            "Password": "password"
+        }]
+}
