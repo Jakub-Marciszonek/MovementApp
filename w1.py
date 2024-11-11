@@ -39,8 +39,7 @@ def AddUser(Path, NewUser):
     print(Data)
     with open(Path, "w") as file:
         json.dump(Data, file, indent=4)
-
-
+    return  len(data["Users"]) - 1
 
 def UpdateAPI(API):
     global data
@@ -60,24 +59,34 @@ def QuitCheck(inp):
     if str(inp).lower() == "quit":
         sys.exit()
 
+##### Replace character in str #####
+
+def ReplaceChar(Str, Char, NewChar):
+    if Str.count(Char) > 0:
+        for i in range(Str.count(Char)):
+            No = Str.find(Char)
+            Str = list(BDate)
+            Str[No] = NewChar
+            Str = "".join(Str)
+
 ##### Checkes if somebodies username is already saved #####
 def LogCheck(Username, Password):                            
     with open("data/Users.json", "r") as file:
         data = json.load(file)
-        for i in range(len(data["Users"])):
-            if Username == data["Users"][i]["Login"]:
-                ID = i
-            else:
-                ID = -1
-            if Password == data["Users"][i]["Password"]:
-                PassNr = i
-            else:
-                PassNr = ID - 1
-            if ID == PassNr:
-                print("Succsesfully loged in")
-                return ID
-        print("Incorrect Login or Password")
-        return -1
+    for i in range(len(data["Users"])):
+        if Username == data["Users"][i]["Login"]:
+            ID = i
+        else:
+            ID = -1
+        if Password == data["Users"][i]["Password"]:
+            PassNr = i
+        else:
+            PassNr = ID - 1
+        if ID == PassNr:
+            print("Succsesfully loged in")
+            return ID
+    print("Incorrect Login or Password")
+    return -1
 
 def UsernameCheck(Username):
     with open("data/Users.json", "r") as file:
@@ -93,31 +102,46 @@ def UsernameCheck(Username):
 def UserData():
     
     global Name, LName, BDate, BDay, BMonth, BYear
-
-    Name = str(input("What's ur name? ")).title()###name and birthday
-    QuitCheck(Name)
-    if str(Name).lower() == "back":
-        return
-    LName = str(input("What's ur lastname? ")).title()
-    QuitCheck(LName)
-    if str(LName).lower() == "back":
-        return
+    while True:
+        Name = str(input("What's ur name? ")).title()###name and birthday
+        QuitCheck(Name)
+        if str(Name).lower() == "back":
+            return
+        if Name != "":
+            break
+    while True:
+        LName = str(input("What's ur lastname? ")).title()
+        QuitCheck(LName)
+        if str(LName).lower() == "back":
+            return
+        if Name != "":
+            break
 
     while True:
-        BDate = input("When you've been born write? \
-The date in (dd/mm/yyyy) format. \n")
-        QuitCheck(BDate)
-        if str(BDate).lower() == "back":
-            return
+        while True:
+            BDate = input("When you've been born write? \
+    The date in (dd/mm/yyyy) format. \n")
+            QuitCheck(BDate)
+            if str(BDate).lower() == "back":
+                return
+            
+            ReplaceChar(BDate, "-", "/")
+            ReplaceChar(BDate, ".", "/")
+            ReplaceChar(BDate, " ", "/")
+
+            if len(BDate) == 10 and BDate.count("/") == 2:
+                break
+            print("#######Invalid format of date#######")
 
         
+
         BDay, BMonth, BYear = map(str, BDate.split("/"))# map is deviding one 
         # variable into 3 new ones respectivly by .split function where separator
-        # is defined as /  
-        if not BDay or not BMonth or not BYear:###not operator work simular as - in math
-            print("#######Invalid format of date#######")
+        # is defined as /
+
         if (len(BYear) != 4) or int(BMonth) < 1 or int(BMonth) > 12 or len(BMonth) != 2\
-    or len(BDay) != 2 or int(BDay) < 1 or int(BDay) > 31:
+or len(BDay) != 2 or int(BDay) < 1 or int(BDay) > 31 or PDate.strftime("%Y")\
+ < BYear or PDate.strftime("%Y") == BYear and PDate.strftime("%m") < BMonth:
             print("#######Invalid format of date#######")###checking format 
         else:
             NewUser.update({"Name":Name})
@@ -192,9 +216,10 @@ or generate it?(Create/Generate)")
                     return
                 if UsernameCheck(Username) != True:
                     NewUser.update({"Login":Username})
-                    return -1
+                    continue
                 else:
                     print("Invalid data")
+                
         print(f"Your username is:\n{Username}")
 ##^^^ Registration part ^^^##
 ##### Password generator ######
@@ -292,10 +317,15 @@ def MoveDet():
     for i in data["feeds"]:
         if (i["field1"] == "1"):
             print("Movement detected")
+            print(f"Created in {i["created_at"][:10]}")
+            print(f"at {i["created_at"][11:16]}\n")
         elif (i["field1"] == "0"):
             print("Movement not detected")
+            print(f"Created in {i["created_at"][:10]}")
+            print(f"at {i["created_at"][11:16]}\n")
         else:
-            print("Invalid data")
+            print("\nInvalid data")
+    input("")
 
 ##### Temperature converter and evaluator #####
 def Temp():
@@ -304,9 +334,13 @@ def Temp():
         for i in data["feeds"]:
             if TemD == "1":###Celsius to Fahrenheit converter
                 print(f"The temperature is {i["field2"]}C°")
+                print(f"Created in {i["created_at"][:10]}")
+                print(f"at {i["created_at"][11:16]}\n")
             elif TemD == "2":
                 FDegrees = (float(i["field2"])*9/5) + 32
                 print(f"The given temperature {i["field2"]}C° is equal to {FDegrees:.2f}F°")
+                print(f"Created in {i["created_at"][:10]}")
+                print(f"at {i["created_at"][11:16]}\n")
             else:
                 print("Invalid data")
 
@@ -318,6 +352,7 @@ def Temp():
                 print("It's getting hot here ( ͡° ͜ʖ ͡°)")
             else:
                 print("ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧")
+        input("")
 
 def NoGame():
     Wins = 0
@@ -351,18 +386,24 @@ def NoGame():
         print(f"You won {Wins} times\nYou lost {Loses} times\nIn {Turns} turns.")
         print("If you would like to exit just type exit if not let me continue")
 ###menu
-
-def MenuDisplay():
-    print("~~~~~Menu~~~~~")
-    print("1.Login\n2.Register\n3.Movement feed\n4.Temperature feed\n0.Exit")
     
-def Menu():
+def Menu1():
+    ID = -1
     print("Hello user, welcome to the Motion Detector! Let's start.\
 type quit whenever you would like to end the session.\n")
     while True:
-        UpdateAPI("https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=5")
-        MenuDisplay()
-        MenuChoice = int(input(""))
+        UpdateAPI("https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=5&timezone=Europe/Helsinki")
+        if ID >= 0:
+            Menu2()
+            return
+        print("~~~~~Login Menu~~~~~")
+        print("1.Login\n2.Register\n0.Exit")
+        MenuChoice = input("")
+        if MenuChoice.isnumeric():
+            MenuChoice = int(MenuChoice)
+        else:
+            print("Invalid input")
+        
         if MenuChoice == 1:
             print("When you want to go back into menu write \"back\"")
             ID = Login()
@@ -371,12 +412,20 @@ type quit whenever you would like to end the session.\n")
             Registration()
             LogRights()
             PasswordCreation()
-            AddUser("data/Users.json", NewUser)
-        elif MenuChoice == 3:
-            MoveDet()
-        elif MenuChoice == 4:
-            Temp()
+            ID = AddUser("data/Users.json", NewUser)
+            
         MenuExit(MenuChoice)
+
+def Menu2():
+    while True:
+        MenuChoice = int(input("1 - Movement detection\
+    \n2 - Temperature\n0 - Log out\n"))
+        if MenuChoice == 1:
+            MoveDet()
+        if MenuChoice == 2:
+            Temp()
+        if MenuChoice == 0:
+            return
 
 def MenuExit(MenuChoice):
     QuitCheck(MenuChoice)
@@ -385,6 +434,6 @@ def MenuExit(MenuChoice):
         sys.exit()
 
 def main():
-    Menu()
+    Menu1()
 
 main()
