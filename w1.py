@@ -34,12 +34,10 @@ data = ""
 def AddUser(Path, NewUser):
     with open(Path, "r") as file:
         Data = json.load(file)
-    print(f"Download\n{Data}")
     Data["Users"].append(NewUser)
-    print(Data)
     with open(Path, "w") as file:
         json.dump(Data, file, indent=4)
-    return  len(data["Users"]) - 1
+    return  len(Data["Users"]) - 1
 
 def UpdateAPI(API):
     global data
@@ -58,16 +56,6 @@ def UpdateAPI(API):
 def QuitCheck(inp):
     if str(inp).lower() == "quit":
         sys.exit()
-
-##### Replace character in str #####
-
-def ReplaceChar(Str, Char, NewChar):
-    if Str.count(Char) > 0:
-        for i in range(Str.count(Char)):
-            No = Str.find(Char)
-            Str = list(BDate)
-            Str[No] = NewChar
-            Str = "".join(Str)
 
 ##### Checkes if somebodies username is already saved #####
 def LogCheck(Username, Password):                            
@@ -92,12 +80,12 @@ def UsernameCheck(Username):
     with open("data/Users.json", "r") as file:
         data = json.load(file)
     for i in data["Users"]:
-        print(i)
         if Username == i["Login"]:
             print("Username is occupied")
             return True
         else:
-            return {"Login":Username}
+            print("kk")
+            return False
 ###### Personale data input ######
 def UserData():
     
@@ -120,14 +108,15 @@ def UserData():
     while True:
         while True:
             BDate = input("When you've been born write? \
-    The date in (dd/mm/yyyy) format. \n")
+The date in (dd/mm/yyyy) format. \n")
             QuitCheck(BDate)
             if str(BDate).lower() == "back":
                 return
             
-            ReplaceChar(BDate, "-", "/")
-            ReplaceChar(BDate, ".", "/")
-            ReplaceChar(BDate, " ", "/")
+            BDate = BDate.replace("-", "/") 
+            BDate = BDate.replace(".", "/")
+            BDate = BDate.replace(",", "/")
+            BDate = BDate.replace(" ", "/")
 
             if len(BDate) == 10 and BDate.count("/") == 2:
                 break
@@ -138,7 +127,7 @@ def UserData():
         BDay, BMonth, BYear = map(str, BDate.split("/"))# map is deviding one 
         # variable into 3 new ones respectivly by .split function where separator
         # is defined as /
-
+        
         if (len(BYear) != 4) or int(BMonth) < 1 or int(BMonth) > 12 or len(BMonth) != 2\
 or len(BDay) != 2 or int(BDay) < 1 or int(BDay) > 31 or PDate.strftime("%Y")\
  < BYear or PDate.strftime("%Y") == BYear and PDate.strftime("%m") < BMonth:
@@ -214,9 +203,9 @@ or generate it?(Create/Generate)")
                 QuitCheck(Username)
                 if str(Username).lower() == "back":
                     return
-                if UsernameCheck(Username) != True:
+                if UsernameCheck(Username) == False:
                     NewUser.update({"Login":Username})
-                    continue
+                    return
                 else:
                     print("Invalid data")
                 
@@ -333,16 +322,16 @@ def Temp():
 \n1. Celsius degrees\n2. Fahrenheit degrees\n"))
         for i in data["feeds"]:
             if TemD == "1":###Celsius to Fahrenheit converter
-                print(f"The temperature is {i["field2"]}C°")
+                print(f"\nThe temperature is {i["field2"]}C°")
                 print(f"Created in {i["created_at"][:10]}")
-                print(f"at {i["created_at"][11:16]}\n")
+                print(f"at {i["created_at"][11:16]}")
             elif TemD == "2":
                 FDegrees = (float(i["field2"])*9/5) + 32
-                print(f"The given temperature {i["field2"]}C° is equal to {FDegrees:.2f}F°")
+                print(f"\nThe given temperature {i["field2"]}C° is equal to {FDegrees:.2f}F°")
                 print(f"Created in {i["created_at"][:10]}")
-                print(f"at {i["created_at"][11:16]}\n")
+                print(f"at {i["created_at"][11:16]}")
             else:
-                print("Invalid data")
+                print("\nInvalid data")
 
             if float(i["field2"]) <= 40:
                 print("CPU is dead cold")
