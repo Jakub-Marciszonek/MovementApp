@@ -59,16 +59,6 @@ def QuitCheck(inp):
     if str(inp).lower() == "quit":
         sys.exit()
 
-##### Replace character in str #####
-
-def ReplaceChar(Str, Char, NewChar):
-    if Str.count(Char) > 0:
-        for i in range(Str.count(Char)):
-            No = Str.find(Char)
-            Str = list(BDate)
-            Str[No] = NewChar
-            Str = "".join(Str)
-
 ##### Checkes if somebodies username is already saved #####
 def LogCheck(Username, Password):                            
     with open("data/Users.json", "r") as file:
@@ -119,14 +109,14 @@ def UserData():
     while True:
         while True:
             BDate = input("When you've been born write? \
-    The date in (dd/mm/yyyy) format. \n")
+The date in (dd/mm/yyyy) format. \n")
             QuitCheck(BDate)
             if str(BDate).lower() == "back":
                 return 0
 
             BDate = BDate.replace("-", "/")
             BDate = BDate.replace(".", "/")
-            BDate = BDate.replace(" ", "/")
+            BDate = BDate.replace("-", "/")
 
             if len(BDate) == 10 and BDate.count("/") == 2:
                 break
