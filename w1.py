@@ -59,6 +59,7 @@ def QuitCheck(inp):
     if str(inp).lower() == "quit":
         sys.exit()
 
+
 ##### Checkes if somebodies username is already saved #####
 def LogCheck(Username, Password):                            
     with open("data/Users.json", "r") as file:
@@ -116,7 +117,7 @@ The date in (dd/mm/yyyy) format. \n")
 
             BDate = BDate.replace("-", "/")
             BDate = BDate.replace(".", "/")
-            BDate = BDate.replace("-", "/")
+            BDate = BDate.replace(" ", "/")
 
             if len(BDate) == 10 and BDate.count("/") == 2:
                 break
@@ -180,8 +181,8 @@ def Registration():
     while True:
         if 0 == UserData():
             return 0
-        Choice = input("Would you like to create your username\
- or generate it?(Create/Generate)")
+        Choice = input("Would you like to create your username \
+or generate it?(Create/Generate)")
         QuitCheck(Choice)
         if str(Choice).lower() == "back":
             return 0
@@ -386,7 +387,6 @@ type quit whenever you would like to end the session.\n")
         UpdateAPI("https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=5&timezone=Europe/Helsinki")
         if ID > 0:
             Menu2()
-            return
         print("~~~~~Login Menu~~~~~")
         print("1.Login\n2.Register\n0.Exit")
         MenuChoice = input("")
