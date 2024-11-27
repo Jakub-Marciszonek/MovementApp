@@ -77,22 +77,21 @@ def LogCheck(Username, Password):
         if Username == data["Users"][i]["Login"]:
             ID = i
         else:
-            ID = -1
+            ID = 0
         if Password == data["Users"][i]["Password"]:
             PassNr = i
         else:
             PassNr = ID - 1
-        if ID == PassNr:
-            print("Succsesfully loged in")
+        if ID == PassNr and ID != 0:
+            print("Succsesfully logged in")
             return ID
     print("Incorrect Login or Password")
-    return -1
+    return 0
 
 def UsernameCheck(Username):
     with open("data/Users.json", "r") as file:
         data = json.load(file)
     for i in data["Users"]:
-        print(i)
         if Username == i["Login"]:
             print("Username is occupied")
             return True
@@ -106,14 +105,14 @@ def UserData():
         Name = str(input("What's ur name? ")).title()###name and birthday
         QuitCheck(Name)
         if str(Name).lower() == "back":
-            return
+            return 0
         if Name != "":
             break
     while True:
         LName = str(input("What's ur lastname? ")).title()
         QuitCheck(LName)
         if str(LName).lower() == "back":
-            return
+            return 0
         if Name != "":
             break
 
@@ -123,11 +122,11 @@ def UserData():
     The date in (dd/mm/yyyy) format. \n")
             QuitCheck(BDate)
             if str(BDate).lower() == "back":
-                return
-            
-            ReplaceChar(BDate, "-", "/")
-            ReplaceChar(BDate, ".", "/")
-            ReplaceChar(BDate, " ", "/")
+                return 0
+
+            BDate = BDate.replace("-", "/")
+            BDate = BDate.replace(".", "/")
+            BDate = BDate.replace(" ", "/")
 
             if len(BDate) == 10 and BDate.count("/") == 2:
                 break
@@ -172,29 +171,31 @@ def Login():
         Username = input("Insert your login: ")
         QuitCheck(Username)
         if str(Username).lower() == "back":
-            break
+            return 0
         Password = input("Insert your password: ")
         QuitCheck(Password)
         if str(Password).lower() == "back":
-            break
+            return 0
         ID = LogCheck(Username, Password)
-        if ID != -1:
+        if ID > 0:
             print(f"\nWelcome {Username}\n")
             return ID
         else:
             print("Invlid data")
+            return 0
 ##^^^Login^^^##
 def Registration():
     global BDay, BMonth, BYear, Name, LName, Username
 #### Creates Username#####
     while True:
-        UserData()
+        if 0 == UserData():
+            return 0
         Choice = input("Would you like to create your username\
-or generate it?(Create/Generate)")
+ or generate it?(Create/Generate)")
         QuitCheck(Choice)
         if str(Choice).lower() == "back":
-            return
-        if Choice.lower() == "generate" or Choice.lower() == "g":
+            return 0
+        elif Choice.lower() == "generate" or Choice.lower() == "g":
             Username = Name[:2] + LName[:3] + str(BYear) + BMonth + BDay
             while UsernameCheck(Username) == True:
                 Username = Username + str(random.randint(1,9))
@@ -204,7 +205,7 @@ or generate it?(Create/Generate)")
             QuitCheck(Choice)
             if Choice.lower() == "submit" or Choice.lower() == "s":
                 NewUser.update({"Login":Username})
-                return -1
+                return 0
             else:
                 print("Restarting...")
                 continue
@@ -213,13 +214,13 @@ or generate it?(Create/Generate)")
                 Username = input("Insert username: ")
                 QuitCheck(Username)
                 if str(Username).lower() == "back":
-                    return
+                    return 0
                 if UsernameCheck(Username) != True:
                     NewUser.update({"Login":Username})
                     continue
                 else:
                     print("Invalid data")
-                
+    
         print(f"Your username is:\n{Username}")
 ##^^^ Registration part ^^^##
 ##### Password generator ######
@@ -335,23 +336,23 @@ def Temp():
             if TemD == "1":###Celsius to Fahrenheit converter
                 print(f"The temperature is {i["field2"]}C°")
                 print(f"Created in {i["created_at"][:10]}")
-                print(f"at {i["created_at"][11:16]}\n")
+                print(f"at {i["created_at"][11:16]}")
             elif TemD == "2":
                 FDegrees = (float(i["field2"])*9/5) + 32
                 print(f"The given temperature {i["field2"]}C° is equal to {FDegrees:.2f}F°")
                 print(f"Created in {i["created_at"][:10]}")
-                print(f"at {i["created_at"][11:16]}\n")
+                print(f"at {i["created_at"][11:16]}")
             else:
                 print("Invalid data")
 
             if float(i["field2"]) <= 40:
-                print("CPU is dead cold")
+                print("CPU is dead cold\n")
             elif float(i["field2"]) > 80:
-                print("[*]RIP CPU [*]")
+                print("[*]RIP CPU [*]\n")
             elif float(i["field2"]) > 65:
-                print("It's getting hot here ( ͡° ͜ʖ ͡°)")
+                print("It's getting hot here ( ͡° ͜ʖ ͡°)\n")
             else:
-                print("ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧")
+                print("ദ്ദി(˵ •̀ ᴗ - ˵ ) ✧\n")
         input("")
 
 def NoGame():
@@ -388,12 +389,12 @@ def NoGame():
 ###menu
     
 def Menu1():
-    ID = -1
+    ID = 0
     print("Hello user, welcome to the Motion Detector! Let's start.\
 type quit whenever you would like to end the session.\n")
     while True:
         UpdateAPI("https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=5&timezone=Europe/Helsinki")
-        if ID >= 0:
+        if ID > 0:
             Menu2()
             return
         print("~~~~~Login Menu~~~~~")
@@ -409,7 +410,9 @@ type quit whenever you would like to end the session.\n")
             ID = Login()
         elif MenuChoice == 2:
             print("When you want to go back into menu write \"back\"")
-            Registration()
+            No = Registration()
+            if No == 0:
+                continue
             LogRights()
             PasswordCreation()
             ID = AddUser("data/Users.json", NewUser)
@@ -432,6 +435,7 @@ def MenuExit(MenuChoice):
     if MenuChoice == 0:
         print("Shutting down the program")
         sys.exit()
+
 
 def main():
     Menu1()
