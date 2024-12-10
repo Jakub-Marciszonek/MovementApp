@@ -36,10 +36,9 @@ def AddUser(Path, NewUser):
         Data = json.load(file)
     print(f"Download\n{Data}")
     Data["Users"].append(NewUser)
-    print(Data)
     with open(Path, "w") as file:
         json.dump(Data, file, indent=4)
-    return  len(data["Users"]) - 1
+    return  len(Data["Users"]) - 1
 
 def UpdateAPI(API):
     global data
@@ -208,7 +207,7 @@ or generate it?(Create/Generate)")
                     return 0
                 if UsernameCheck(Username) != True:
                     NewUser.update({"Login":Username})
-                    continue
+                    return 1
                 else:
                     print("Invalid data")
     
