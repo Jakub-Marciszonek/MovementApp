@@ -387,6 +387,7 @@ type quit whenever you would like to end the session.\n")
         UpdateAPI("https://api.thingspeak.com/channels/2578404/feeds.json?api_key=XSXF6WH7DAECB6S1&results=5&timezone=Europe/Helsinki")
         if ID > 0:
             Menu2()
+            1
         print("~~~~~Login Menu~~~~~")
         print("1.Login\n2.Register\n0.Exit")
         MenuChoice = input("")
