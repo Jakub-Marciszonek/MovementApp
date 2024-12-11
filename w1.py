@@ -1,5 +1,6 @@
 ##### Imports #####
 
+import hashlib
 import json
 import requests
 import sys
@@ -34,7 +35,7 @@ data = ""
 def AddUser(Path, NewUser):
     with open(Path, "r") as file:
         Data = json.load(file)
-    print(f"Download\n{Data}")
+    print(f"Downloaded\n")
     Data["Users"].append(NewUser)
     with open(Path, "w") as file:
         json.dump(Data, file, indent=4)
@@ -60,7 +61,9 @@ def QuitCheck(inp):
 
 
 ##### Checkes if somebodies username is already saved #####
-def LogCheck(Username, Password):                            
+def LogCheck(Username, Password):
+    Password = hashlib.sha256(Password.encode("utf-8")).hexdigest()
+    print(Password)                       
     with open("data/Users.json", "r") as file:
         data = json.load(file)
     for i in range(len(data["Users"])):
@@ -108,8 +111,8 @@ def UserData():
 
     while True:
         while True:
-            BDate = input("When you've been born write? \
-The date in (dd/mm/yyyy) format. \n")
+            BDate = input("Insert date of birth \
+(dd/mm/yyyy). \n")
             QuitCheck(BDate)
             if str(BDate).lower() == "back":
                 return 0
@@ -130,7 +133,7 @@ The date in (dd/mm/yyyy) format. \n")
 
         if (len(BYear) != 4) or int(BMonth) < 1 or int(BMonth) > 12 or len(BMonth) != 2\
 or len(BDay) != 2 or int(BDay) < 1 or int(BDay) > 31 or PDate.strftime("%Y")\
- < BYear or PDate.strftime("%Y") == BYear and PDate.strftime("%m") < BMonth:
+< BYear or PDate.strftime("%Y") == BYear and PDate.strftime("%m") < BMonth:
             print("#######Invalid format of date#######")###checking format 
         else:
             NewUser.update({"Name":Name})
@@ -145,15 +148,15 @@ def LogRights():
 
     if int(BMonth) > PDate.month or (int(BMonth) == PDate.month and int(BDay) < PDate.day):
         Age -= 1 ###counting age based on birth date
-
-    elif Age >= 18:
+    print("dupa")
+    if Age >= 18:
         NewUser.update({"Age":Age})
         NewUser.update({"Rights":"Viewer"})
         print(f"Welcome {Name}, you have viewer rights.")
-        return 
+        return True
     else:
-        print(f"Greetings {Name}, you are too young to operate this program. Continue")
-        return 
+        print(f"Greetings {Name}, you are too young to operate this program.")
+        return False
     
 #####Log in #####
 def Login():
@@ -166,6 +169,7 @@ def Login():
         QuitCheck(Password)
         if str(Password).lower() == "back":
             return 0
+        Password = hashlib.sha256(Password.encode("utf-8")).hexdigest()
         ID = LogCheck(Username, Password)
         if ID > 0:
             print(f"\nWelcome {Username}\n")
@@ -180,38 +184,43 @@ def Registration():
     while True:
         if 0 == UserData():
             return 0
-        Choice = input("Would you like to create your username \
+        while True:
+            Choice = input("Would you like to create your username \
 or generate it?(Create/Generate)")
-        QuitCheck(Choice)
-        if str(Choice).lower() == "back":
-            return 0
-        elif Choice.lower() == "generate" or Choice.lower() == "g":
-            Username = Name[:2] + LName[:3] + str(BYear) + BMonth + BDay
-            while UsernameCheck(Username) == True:
-                Username = Username + str(random.randint(1,9))
-                if UsernameCheck(Username) != True:
-                    break
-            Choice = input(f"I suggest {Username}(Submit/restart) ")
             QuitCheck(Choice)
-            if Choice.lower() == "submit" or Choice.lower() == "s":
-                NewUser.update({"Login":Username})
+            if str(Choice).lower() == "back":
                 return 0
-            else:
-                print("Restarting...")
-                continue
-        elif Choice.lower() == "create" or Choice.lower() == "c":
-            while True:
-                Username = input("Insert username: ")
-                QuitCheck(Username)
-                if str(Username).lower() == "back":
-                    return 0
-                if UsernameCheck(Username) != True:
+            elif Choice.lower() == "generate" or Choice.lower() == "g":
+                Username = Name[:2] + LName[:3] + str(BYear) + BMonth + BDay
+                while UsernameCheck(Username) == True:
+                    Username = Username + str(random.randint(1,9))
+                    if UsernameCheck(Username) != True:
+                        break
+                Choice = input(f"I suggest {Username}(Submit/Generate) ")
+                QuitCheck(Choice)
+                if Choice.lower() == "submit" or Choice.lower() == "s":
                     NewUser.update({"Login":Username})
                     return 1
+                elif Choice.lower() == "back" or Choice.lower() == "b":
+                    continue
+                elif Choice.lower() == "restart" or Choice.lower() == "r":
+                    print("Restarting...")
+                    break
                 else:
-                    print("Invalid data")
-    
-        print(f"Your username is:\n{Username}")
+                    print("Invalid data\nRestarting...")
+            elif Choice.lower() == "create" or Choice.lower() == "c":
+                while True:
+                    Username = input("Insert username: ")
+                    QuitCheck(Username)
+                    if str(Username).lower() == "back":
+                        return 0
+                    if UsernameCheck(Username) != True:
+                        NewUser.update({"Login":Username})
+                        return 1
+                    else:
+                        print("Invalid data")
+        
+            print(f"Your username is:\n{Username}")
 ##^^^ Registration part ^^^##
 ##### Password generator ######
 ### Characteer selection menu
@@ -273,6 +282,7 @@ Password have to be min 5 characters long(Generate/Create)")
                     PasswordSub = str(input("Do you want to submit, generate or restart the password?\n\
 (Submit/Restart/Generate): "))
                     if PasswordSub.lower() == "submit" or "sub" or "s":
+                        Password = hashlib.sha256(Password.encode("utf-8")).hexdigest()
                         NewUser.update({"Password":"".join(Password)})
                         return 
                     elif PasswordSub.lower() == "restart" or "res" or "r":
@@ -287,13 +297,14 @@ Password have to be min 5 characters long(Generate/Create)")
             while True:
                 Password = input("Create your password(min no of characters is 5): \n")
                 if len(Password) >= 5:
-                    Choice = input(f"Do you want to submit that password(Submit/again/restart):\n{Password}")
+                    Choice = input(f"Do you want to submit that password(Submit/Restart/Back): ")
                     QuitCheck(Choice)
                     if Choice.lower() == "submit" or "sub" or "s":
+                        Password = hashlib.sha256(Password.encode("utf-8")).hexdigest()
                         NewUser.update({"Password":Password})
                         print("Submited")
                         return
-                    elif Choice.lower() == "again" or "a":
+                    elif Choice.lower() == "back" or "b":
                         continue
                     else:
                         break
@@ -403,7 +414,9 @@ type quit whenever you would like to end the session.\n")
             No = Registration()
             if No == 0:
                 continue
-            LogRights()
+            Age = LogRights()
+            if Age != True:
+                continue
             PasswordCreation()
             ID = AddUser("data/Users.json", NewUser)
             
@@ -428,6 +441,7 @@ def MenuExit(MenuChoice):
 
 
 def main():
+
     Menu1()
 
-main()
+    main()
